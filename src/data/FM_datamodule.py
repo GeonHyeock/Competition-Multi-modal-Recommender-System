@@ -21,8 +21,8 @@ class FMDataModule(LightningDataModule):
         self.save_hyperparameters(logger=False)
 
         data = pd.read_csv(data_dir + "raw/train.csv").to_numpy()
-        image = np.load(data_dir + "raw/image.npy")
-        text = np.load(data_dir + "raw/text.npy")
+        image = np.load(data_dir + "raw/image.npy").astype(np.float32)
+        text = np.load(data_dir + "raw/text.npy").astype(np.float32)
 
         dataset = FMDataset(data, image, text)
 
@@ -57,13 +57,7 @@ class FMDataModule(LightningDataModule):
         )
 
     def test_dataloader(self):
-        return DataLoader(
-            dataset=self.data_test,
-            batch_size=self.hparams.batch_size,
-            num_workers=self.hparams.num_workers,
-            pin_memory=self.hparams.pin_memory,
-            shuffle=False,
-        )
+        pass
 
     def teardown(self, stage: Optional[str] = None):
         """Clean up after fit or test."""

@@ -1,9 +1,21 @@
 from typing import Any
 
 import torch
+import torch.nn as nn
 from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric, MinMetric
 from torchmetrics.regression import MeanSquaredError
+
+
+class RMSELoss(nn.Module):
+    def __init__(self, eps=1e-8):
+        super().__init__()
+        self.mse = torch.nn.MSELoss()
+        self.eps = eps
+
+    def forward(self, yhat, y):
+        loss = torch.sqrt(self.mse(yhat, y) + self.eps)
+        return loss
 
 
 class FmModule(LightningModule):
@@ -22,7 +34,7 @@ class FmModule(LightningModule):
         self.net = net
 
         # loss function
-        self.criterion = torch.nn.MSELoss()
+        self.criterion = RMSELoss()
 
         self.train_mse = MeanSquaredError()
         self.val_mes = MeanSquaredError()
@@ -53,7 +65,6 @@ class FmModule(LightningModule):
 
         # update and log metrics
         self.train_loss(loss)
-        # self.train_mse(preds, y)
         self.log(
             "train/loss",
             self.train_loss,
@@ -78,7 +89,7 @@ class FmModule(LightningModule):
             "val/loss",
             self.val_loss,
             on_step=True,
-            on_epoch=True,
+            on_epoch=False,
             prog_bar=True,
             sync_dist=True,
         )
@@ -89,7 +100,7 @@ class FmModule(LightningModule):
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
         self.log(
-            "val/mse_best", self.val_mse_best.compute(), sync_dist=True, prog_bar=True
+            "val/epoch_loss", self.val_mse_best.compute(), sync_dist=True, prog_bar=True
         )
 
     def test_step(self, batch: Any, batch_idx: int):
@@ -112,7 +123,7 @@ class FmModule(LightningModule):
                 "optimizer": optimizer,
                 "lr_scheduler": {
                     "scheduler": scheduler,
-                    "monitor": "val/loss",
+                    "monitor": "val/epoch_loss",
                     "interval": "epoch",
                     "frequency": 1,
                 },

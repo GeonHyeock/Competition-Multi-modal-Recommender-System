@@ -59,11 +59,34 @@ class FactorizationMachineModel(nn.Module):
         self.fm = FactorizationMachine(reduce_sum=True)
         self.output_linear = nn.Linear(1, 1, bias=False)
 
+        self.image_feat = nn.Sequential(
+            nn.Linear(4096, 1028),
+            nn.BatchNorm1d(1028),
+            nn.ReLU(),
+            nn.Linear(1028, 256),
+        )
+
+        self.text_feat = nn.Sequential(
+            nn.Linear(384, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+        )
+
     def forward(self, x: torch.Tensor):
         """
         :param x: Long tensor of size ``(batch_size, num_fields)``
         """
         x, image, text = x
-        x = self.linear(x) + self.fm(self.embedding(x))
+        x = self.linear(x) + self.fm(
+            torch.cat(
+                (
+                    self.embedding(x),
+                    self.image_feat(image).unsqueeze(1),
+                    self.text_feat(text).unsqueeze(1),
+                ),
+                dim=1,
+            )
+        )
         # return torch.sigmoid(x.squeeze(1))
         return x.squeeze(1)
