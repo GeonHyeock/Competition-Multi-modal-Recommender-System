@@ -16,5 +16,5 @@ scheduler:
 net:
   _target_: FM.model.FactorizationMachineModel
   field_dims: [192403,63001]
-  embed_dim: 512
+  embed_dim: 256
   
