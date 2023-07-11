@@ -13,7 +13,7 @@ from logging import getLogger
 
 
 class Config(object):
-    """ Configurator module that load the defined parameters.
+    """Configurator module that load the defined parameters.
 
     Configurator module will first load the default parameters from the fixed properties in RecBole and then
     load parameters from the external input.
@@ -56,8 +56,8 @@ class Config(object):
         # load dataset config file yaml
         if config_dict is None:
             config_dict = {}
-        config_dict['model'] = model
-        config_dict['dataset'] = dataset
+        config_dict["model"] = model
+        config_dict["dataset"] = dataset
         # model type
         self.final_config_dict = self._load_dataset_model_config(config_dict)
         # config in cmd and main.py are latest
@@ -70,44 +70,55 @@ class Config(object):
         file_list = []
         # get dataset and model files
         cur_dir = os.getcwd()
-        cur_dir = os.path.join(cur_dir, 'configs')
+        cur_dir = os.path.join(cur_dir, "configs")
         file_list.append(os.path.join(cur_dir, "overall.yaml"))
-        file_list.append(os.path.join(cur_dir, "dataset", "{}.yaml".format(config_dict['dataset'])))
-        file_list.append(os.path.join(cur_dir, "model", "{}.yaml".format(config_dict['model'])))
+        file_list.append(
+            os.path.join(cur_dir, "dataset", "{}.yaml".format(config_dict["dataset"]))
+        )
+        file_list.append(
+            os.path.join(cur_dir, "model", "{}.yaml".format(config_dict["model"]))
+        )
 
         for file in file_list:
             if os.path.isfile(file):
-                with open(file, 'r', encoding='utf-8') as f:
-                    file_config_dict.update(yaml.load(f.read(), Loader=self._build_yaml_loader()))
+                with open(file, "r", encoding="utf-8") as f:
+                    file_config_dict.update(
+                        yaml.load(f.read(), Loader=self._build_yaml_loader())
+                    )
         return file_config_dict
 
     def _build_yaml_loader(self):
         loader = yaml.FullLoader
         loader.add_implicit_resolver(
-            u'tag:yaml.org,2002:float',
-            re.compile(u'''^(?:
+            "tag:yaml.org,2002:float",
+            re.compile(
+                """^(?:
              [-+]?(?:[0-9][0-9_]*)\\.[0-9_]*(?:[eE][-+]?[0-9]+)?
             |[-+]?(?:[0-9][0-9_]*)(?:[eE][-+]?[0-9]+)
             |\\.[0-9_]+(?:[eE][-+][0-9]+)?
             |[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\\.[0-9_]*
             |[-+]?\\.(?:inf|Inf|INF)
-            |\\.(?:nan|NaN|NAN))$''', re.X),
-            list(u'-+0123456789.'))
+            |\\.(?:nan|NaN|NAN))$""",
+                re.X,
+            ),
+            list("-+0123456789."),
+        )
         return loader
 
     def _set_default_parameters(self):
-        smaller_metric = ['rmse', 'mae', 'logloss']
-        valid_metric = self.final_config_dict['valid_metric'].split('@')[0]
-        self.final_config_dict['valid_metric_bigger'] = False if valid_metric in smaller_metric else True
-        # if seed not in hyper_parameters, then add
-        if "seed" not in self.final_config_dict['hyper_parameters']:
-            self.final_config_dict['hyper_parameters'] += ['seed']
+        smaller_metric = ["rmse", "mae", "logloss"]
+        valid_metric = self.final_config_dict["valid_metric"].split("@")[0]
+        self.final_config_dict["valid_metric_bigger"] = (
+            False if valid_metric in smaller_metric else True
+        )
 
     def _init_device(self):
-        use_gpu = self.final_config_dict['use_gpu']
+        use_gpu = self.final_config_dict["use_gpu"]
         if use_gpu:
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(self.final_config_dict['gpu_id'])
-        self.final_config_dict['device'] = torch.device("cuda" if torch.cuda.is_available() and use_gpu else "cpu")
+            os.environ["CUDA_VISIBLE_DEVICES"] = str(self.final_config_dict["gpu_id"])
+        self.final_config_dict["device"] = torch.device(
+            "cuda" if torch.cuda.is_available() and use_gpu else "cpu"
+        )
 
     def __setitem__(self, key, value):
         if not isinstance(key, str):
@@ -126,9 +137,14 @@ class Config(object):
         return key in self.final_config_dict
 
     def __str__(self):
-        args_info = '\n'
-        args_info += '\n'.join(["{}={}".format(arg, value) for arg, value in self.final_config_dict.items()])
-        args_info += '\n\n'
+        args_info = "\n"
+        args_info += "\n".join(
+            [
+                "{}={}".format(arg, value)
+                for arg, value in self.final_config_dict.items()
+            ]
+        )
+        args_info += "\n\n"
         return args_info
 
     def __repr__(self):
