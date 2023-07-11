@@ -10,6 +10,7 @@ Main entry
 import os
 import argparse
 import yaml
+import wandb
 from utils.quick_start import quick_start
 
 os.environ["NUMEXPR_MAX_THREADS"] = "48"
@@ -33,6 +34,7 @@ if __name__ == "__main__":
     with open(f"./src/configs/dataset/{args.dataset}.yaml") as f:
         config_dict.update(yaml.load(f, Loader=yaml.FullLoader))
 
+    wandb.login()
     quick_start(
         model=args.model, dataset=args.dataset, config_dict=config_dict, save_model=True
     )
