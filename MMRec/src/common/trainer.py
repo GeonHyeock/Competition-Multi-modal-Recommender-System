@@ -276,6 +276,7 @@ class Trainer(AbstractTrainer):
                 valid_start_time = time()
                 valid_score, valid_result = self._valid_epoch(valid_data)
                 if valid_score > self.config["best_model_score"]:
+                    self.config["best_model_score"] = valid_score
                     print(valid_score, ">", self.config["best_model_score"])
                     self.logger.info(
                         str(
