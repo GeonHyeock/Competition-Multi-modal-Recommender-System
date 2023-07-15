@@ -275,16 +275,6 @@ class Trainer(AbstractTrainer):
             if (epoch_idx + 1) % self.eval_step == 0:
                 valid_start_time = time()
                 valid_score, valid_result = self._valid_epoch(valid_data)
-                if valid_score > self.config["best_model_score"]:
-                    self.config["best_model_score"] = valid_score
-                    print(valid_score, ">", self.config["best_model_score"])
-                    self.logger.info(
-                        str(
-                            {i: self.config[i] for i in self.config["hyper_parameters"]}
-                        )
-                        + f"\n {valid_score} > {self.best_valid_score}"
-                    )
-                    torch.save(self.model, f"saved/{self.config['model']}_best.pt")
                 (
                     self.best_valid_score,
                     self.cur_step,
@@ -314,8 +304,26 @@ class Trainer(AbstractTrainer):
                     )
                     if verbose:
                         self.logger.info(update_output)
+                    torch.save(
+                        self.model,
+                        f"saved/{self.config['model']}/hyper={self.config['hyper']}.pt",
+                    )
                     self.best_valid_result = valid_result
 
+                    if self.best_valid_score > self.config["best_model_score"]:
+                        self.logger.info(
+                            f"best model 변경 : {self.best_valid_score} > {self.config['best_model_score']}"
+                        )
+                        self.config["best_model_score"] = self.best_valid_score
+                        torch.save(self.model, f"saved/{self.config['model']}/best.pt")
+
+                wandb.log(
+                    {
+                        "epoch": epoch_idx,
+                        "train/loss": self.train_loss_dict[epoch_idx],
+                        **{"val/" + k: v for k, v in valid_result.items()},
+                    }
+                )
                 if stop_flag:
                     stop_output = (
                         "+++++Finished training, best eval result in epoch %d"
@@ -324,13 +332,6 @@ class Trainer(AbstractTrainer):
                     if verbose:
                         self.logger.info(stop_output)
                     break
-                wandb.log(
-                    {
-                        "epoch": epoch_idx,
-                        "train/loss": self.train_loss_dict[epoch_idx],
-                        **{"val/" + k: v for k, v in valid_result.items()},
-                    }
-                )
         return self.best_valid_score, self.best_valid_result, self.best_test_upon_valid
 
     @torch.no_grad()

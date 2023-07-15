@@ -25,6 +25,9 @@ def quick_start(model, dataset, config_dict, save_model=True):
     init_logger(config)
     logger = getLogger()
 
+    if not os.path.exists(f"saved/{config['model']}"):
+        os.makedirs(f"saved/{config['model']}")
+
     # print config infor
     logger.info("██Server: \t" + platform.node())
     logger.info("██Dir: \t" + os.getcwd() + "\n")
@@ -61,12 +64,12 @@ def quick_start(model, dataset, config_dict, save_model=True):
     for hyper_tuple in combinators:
         for j, k in zip(config["hyper_parameters"], hyper_tuple):
             config[j] = k
-        hyper = {i: config[i] for i in config["hyper_parameters"]}
+        config["hyper"] = {i: config[i] for i in config["hyper_parameters"]}
         wandb.init(
             project="inha-Competition",
             group=config["model"],
-            name=str(hyper),
-            config=hyper,
+            name=str(config["hyper"]),
+            config=config["hyper"],
         )
 
         logger.info(
