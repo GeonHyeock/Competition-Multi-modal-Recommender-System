@@ -1,0 +1,85 @@
+#useless
+verbose: 5
+core: 5
+lambda_coeff: 0.9
+early_stopping_patience: 7
+layers: 1
+mess_dropout: '[0.1, 0.1]'
+sparse: 1
+test_flag: part
+metapath_threshold: 2
+sc: 1.0
+ssl_c_rate: 1.3
+ssl_s_rate: 0.8
+G_rate: 0.0001
+sample_num: 1
+sample_num_co: 2
+sample_num_ii: 8
+sample_num_neg: 1
+mask_rate: 0.75
+gss_rate: 0.85
+anchor_rate: 0.75
+feat_reg_decay: 1.0e-05
+ad1_rate: 0.2
+ad2_rate: 0.2
+ad_sampNum: 1
+ad_topk_multi_num: 100
+fake_gene_rate: 0.0001
+ID_layers: 1
+reward_rate: 1
+G_embed_size: 64
+model_num: 2
+negrate: 0.01
+cis: 25
+confidence: 0.5
+ii_it: 15
+isload: false
+isJustTest: false
+loadModelPath: 
+title: try_to_draw_line
+
+#train
+data_path: ./
+seed: 42
+dataset: 'Inha'
+epoch: 1000
+batch_size: 1024
+embed_size: 64
+D_lr: 0.0003
+topk: 10
+cf_model: slmrec
+debug: false
+cl_rate: 0.03
+norm_type: sym
+gpu_id: 0,1
+Ks: '[50]'
+regs: '[1e-5,1e-5,1e-2]'
+lr: 0.00055
+emm: 0.001
+L2_alpha: 0.001
+weight_decay: 0.0001
+
+
+
+G_drop1: 0.31
+G_drop2: 0.5
+T: 1
+dgl_nei_num: 8
+drop_rate: 0.2
+g_rate: 2.9e-05
+geneGraph_rate: 0.1
+geneGraph_rate_neg: -1
+geneGraph_rate_pos: 2
+gnn_cat_rate: 0.55
+gp_rate: 1
+head_num: 4
+id_cat_rate: 0.36
+id_cat_rate1: 0.36
+log_log_scale: 1.0e-05
+m_topk_rate: 0.0001
+model_cat_rate: 0.55
+point: ''
+real_data_tau: 0.005
+tau: 0.5
+ui_pre_scale: 100
+weight_size: '[64, 64]'

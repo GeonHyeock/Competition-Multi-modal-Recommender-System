@@ -25,17 +25,15 @@ import copy
 
 from utility.parser import parse_args
 from Models import MMSSL, Discriminator
+
 from utility.batch_test import *
 from utility.logging import Logger
 from utility.norm import build_sim, build_knn_normalized_graph
-from torch.utils.tensorboard import SummaryWriter
-
-
-args = parse_args()
 
 
 class Trainer(object):
     def __init__(self, data_config):
+        self.args = args
         self.task_name = "%s_%s_%s" % (
             datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             args.dataset,
@@ -416,8 +414,6 @@ class Trainer(object):
         stopping_step = 0
         should_stop = False
         cur_best_pre_0 = 0.0
-        # tb_writer = SummaryWriter(log_dir="/home/ww/Code/work5/MICRO2Ours/tensorboard/")
-        # tensorboard_cnt = 0
 
         n_batch = data_generator.n_train // args.batch_size + 1
         best_recall = 0
@@ -790,6 +786,7 @@ def set_seed(seed):
 
 
 if __name__ == "__main__":
+    args = parse_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     set_seed(args.seed)
     config = dict()
