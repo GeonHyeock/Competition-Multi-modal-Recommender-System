@@ -21,7 +21,9 @@ def submission(args):
         config_dict.update(yaml.load(f, Loader=yaml.FullLoader))
 
     config = Config(args.model, args.dataset, config_dict)
-
+    if args.Saved_Model.find("fold") >= 0:
+        idx = args.Saved_Model.find("fold")
+        config["inter_splitting_label"] = args.Saved_Model[idx : idx + 6]
     dataset = RecDataset(config)
     train, _, _ = dataset.split()
     print(dataset)
@@ -30,7 +32,7 @@ def submission(args):
         config,
         dataset,
         additional_dataset=train,
-        batch_size=128,
+        batch_size=1028,
     )
     model.eval()
     submission_user, submission_item = [], []
@@ -60,7 +62,6 @@ def submission(args):
 
 
 if __name__ == "__main__":
-    os.chdir("./MMRec")
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", "-m", type=str, default="BM3", help="name of models")
     parser.add_argument(
@@ -71,6 +72,7 @@ if __name__ == "__main__":
     )
     args, _ = parser.parse_known_args()
     for pt in os.listdir(args.Saved_Model):
-        args.Saved_Model = pt
-        submission(args)
+        if "inter" in pt:
+            args.Saved_Model = pt
+            submission(args)
     print("Done")
