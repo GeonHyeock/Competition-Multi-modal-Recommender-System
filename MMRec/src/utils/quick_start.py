@@ -33,31 +33,14 @@ def quick_start(model, dataset, config_dict, save_model=True):
     logger.info("██Dir: \t" + os.getcwd() + "\n")
     logger.info(config)
 
-    # load data
-    dataset = RecDataset(config)
-
-    # print dataset statistics
-    logger.info(str(dataset))
-    train_dataset, valid_dataset, _ = dataset.split()
-    logger.info("\n====Training====\n" + str(train_dataset))
-    logger.info("\n====Validation====\n" + str(valid_dataset))
-
-    # wrap into dataloader
-    train_data = TrainDataLoader(
-        config, train_dataset, batch_size=config["train_batch_size"], shuffle=True
-    )
-    valid_data = EvalDataLoader(
-        config,
-        valid_dataset,
-        additional_dataset=train_dataset,
-        batch_size=config["eval_batch_size"],
-    )
-
     ############ Dataset loadded, run model
     hyper_ret, idx = [], 0
     logger.info("\n\n=================================\n\n")
 
     # hyper-parameters & combinations
+    if isinstance(config["inter_splitting_label"], list):
+        config["hyper_parameters"] += ["inter_splitting_label"]
+
     hyper_ls = [config[i] or [None] for i in config["hyper_parameters"]]
     combinators = list(product(*hyper_ls))
     total_loops = len(combinators)
@@ -67,11 +50,30 @@ def quick_start(model, dataset, config_dict, save_model=True):
         config["hyper"] = {i: config[i] for i in config["hyper_parameters"]}
         wandb.init(
             project="inha-Competition",
-            group=config["model"],
+            group=config["model"] + config["wandb_group"],
             name=str(config["hyper"]),
             config=config["hyper"],
         )
 
+        # load data
+        dataset = RecDataset(config)
+
+        # print dataset statistics
+        logger.info(str(dataset))
+        train_dataset, valid_dataset, _ = dataset.split()
+        logger.info("\n====Training====\n" + str(train_dataset))
+        logger.info("\n====Validation====\n" + str(valid_dataset))
+
+        # wrap into dataloader
+        train_data = TrainDataLoader(
+            config, train_dataset, batch_size=config["train_batch_size"], shuffle=True
+        )
+        valid_data = EvalDataLoader(
+            config,
+            valid_dataset,
+            additional_dataset=train_dataset,
+            batch_size=config["eval_batch_size"],
+        )
         logger.info(
             "========={}/{}: Parameters:{}={}=======".format(
                 idx + 1, total_loops, config["hyper_parameters"], hyper_tuple
