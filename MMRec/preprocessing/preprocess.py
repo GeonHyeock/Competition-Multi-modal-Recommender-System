@@ -2,15 +2,11 @@ import os, csv
 import random
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import KFold
 from collections import Counter
 
 
-def splitting_1():
-    Path = "MMRec/data/Inha"
-    rslt_file = "Inha.inter"
-    df = pd.read_csv(os.path.join(Path, rslt_file), sep="\t")
-    print(f"shape: {df.shape}")
-
+def splitting_1(df, version=0):
     df = df.sample(frac=1).reset_index(drop=True)
     df.sort_values(by=["userID"], inplace=True)
 
@@ -20,23 +16,32 @@ def splitting_1():
     for u, u_ls in uid_freq:
         u_i_dict[u] = list(u_ls)
 
-    new_label = []
     u_ids_sorted = sorted(u_i_dict.keys())
-
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    fold = [[] for _ in range(5)]
+    item3 = [[0, 0, 1], [0, 1, 0], [1, 0, 0]] * 2
+    item4 = [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]]
     for u in u_ids_sorted:
         items = u_i_dict[u]
         n_items = len(items)
-        if n_items < 10:
-            tmp_ls = [0] * (n_items - 1) + [1]
+        if n_items == 3:
+            random.shuffle(item3)
+            for i in range(5):
+                fold[i].extend(item3[i])
+        elif n_items == 4:
+            random.shuffle(item4)
+            for i in range(4):
+                fold[i].extend(item4[i])
+            fold[4].extend(random.choice(item4))
         else:
-            val_test_len = int(n_items * 0.2) + 1
-            train_len = n_items - val_test_len
-            val_len = val_test_len
-            tmp_ls = [0] * train_len + [1] * val_len
-        new_label.extend(tmp_ls)
-    df["x_label"] = new_label
-    new_labeled_file = rslt_file[:-6] + "-v4.inter"
-    df.to_csv(os.path.join(Path, new_labeled_file), sep="\t", index=False)
+            for i, (_, valid_index) in enumerate(kf.split(items)):
+                tmp_ls = np.zeros([n_items])
+                tmp_ls[valid_index] = 1
+                fold[i].extend(tmp_ls)
+    for i in range(5):
+        df[f"fold_{i}"] = fold[i]
+    new_labeled_file = rslt_file[:-6] + "-v" + f"{version}" + ".inter"
+    return df, new_labeled_file
 
 
 def rating2inter_0(df, splitting=[0.8, 0.2]):
@@ -98,8 +103,8 @@ def rating2inter_0(df, splitting=[0.8, 0.2]):
     print(f"columns: {temp_df.columns}")
 
     temp_df.columns = [learner_id, course_id, "rating", x_label]
-    temp_df.to_csv(os.path.join(rslt_dir, rslt_file), sep="\t", index=False)
     print(temp_df.x_label.value_counts())
+    return temp_df, rslt_dir, rslt_file
 
 
 def get_illegal_ids_by_inter_num(df, field, max_num=None, min_num=None):
@@ -142,18 +147,26 @@ def filter_by_k_core(df, min_u_num=0, min_i_num=0):
         df.drop(df.index[dropped_inter], inplace=True)
 
 
-def main():
+def BM3():
+    Path = "MMRec/data/Inha"
+    rslt_file = "Inha.inter"
+    df = pd.read_csv(os.path.join(Path, rslt_file), sep="\t")
+    print(f"shape: {df.shape}")
+
+    df, new_labeled_file = splitting_1(df)
+    df.to_csv(os.path.join(Path, new_labeled_file), sep="\t", index=False)
+
+
+if __name__ == "__main__":
+    random.seed(42)
+    np.random.seed(42)
     df = pd.read_csv(
         "./data/raw/train.csv",
         names=["userID", "itemID", "rating"],
         header=0,
     )
     print(f"raw data shape: {df.shape}")
-    rating2inter_0(df)
-    splitting_1()
+    temp_df, rslt_dir, rslt_file = rating2inter_0(df)
+    temp_df.to_csv(os.path.join(rslt_dir, rslt_file), sep="\t", index=False)
 
-
-if __name__ == "__main__":
-    random.seed(42)
-    np.random.seed(42)
-    main()
+    BM3()
