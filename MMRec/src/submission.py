@@ -9,6 +9,14 @@ from utils.configurator import Config
 from utils.dataloader import TrainDataLoader, EvalDataLoader
 
 
+def createDirectory(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print("Error: Failed to create the directory.")
+
+
 def submission(args):
     model = torch.load(os.path.join("saved", args.model, args.Saved_Model)).to("cuda")
     with open("./src/configs/overall.yaml") as f:
@@ -71,6 +79,9 @@ if __name__ == "__main__":
         "--Saved_Model", "-S", type=str, default="saved/BM3", help="model.pt"
     )
     args, _ = parser.parse_known_args()
+
+    createDirectory(os.path.join(f"../submission/{args.model}"))
+
     for pt in os.listdir(args.Saved_Model):
         if "inter" in pt:
             args.Saved_Model = pt
