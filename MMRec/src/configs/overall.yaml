@@ -5,7 +5,7 @@ seed: 42
 
 # multi-modal raw features
 data_path: './data/'
-inter_splitting_label: 'x_label'
+inter_splitting_label: [fold_0, fold_1, fold_2, fold_3, fold_4]
 filter_out_cod_start_users: True
 is_multimodal_model: True
 
@@ -60,4 +60,7 @@ end2end: False
 
 # iteration parameters
 best_model_score: -1
-hyper_parameters: []
+hyper_parameters: [inter_splitting_label]
+
+# wandb
+wandb_group: /test

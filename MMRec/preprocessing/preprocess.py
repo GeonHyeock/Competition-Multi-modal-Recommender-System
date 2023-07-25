@@ -2,11 +2,12 @@ import os, csv
 import random
 import pandas as pd
 import numpy as np
+import shutil
 from sklearn.model_selection import KFold
 from collections import Counter
 
 
-def splitting_1(df, version=0):
+def splitting_1(df, version):
     df = df.sample(frac=1).reset_index(drop=True)
     df.sort_values(by=["userID"], inplace=True)
 
@@ -147,19 +148,29 @@ def filter_by_k_core(df, min_u_num=0, min_i_num=0):
         df.drop(df.index[dropped_inter], inplace=True)
 
 
-def BM3():
+def BM3(version=4):
     Path = "MMRec/data/Inha"
     rslt_file = "Inha.inter"
     df = pd.read_csv(os.path.join(Path, rslt_file), sep="\t")
     print(f"shape: {df.shape}")
 
-    df, new_labeled_file = splitting_1(df)
+    df, new_labeled_file = splitting_1(df, version)
     df.to_csv(os.path.join(Path, new_labeled_file), sep="\t", index=False)
 
 
 if __name__ == "__main__":
     random.seed(42)
     np.random.seed(42)
+    os.chdir("..")
+
+    for file in ["image.npy", "text.npy"]:
+        feat = os.path.join("MMRec/data/Inha", file)
+        if not os.path.isfile(feat):
+            try:
+                shutil.copyfile(os.path.join("data/raw", file), feat)
+            except:
+                pass
+
     df = pd.read_csv(
         "./data/raw/train.csv",
         names=["userID", "itemID", "rating"],
