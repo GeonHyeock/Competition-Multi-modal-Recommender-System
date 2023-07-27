@@ -3,11 +3,16 @@ import utils
 from world import cprint
 import torch
 import numpy as np
+
 from torch.utils.tensorboard import SummaryWriter
+import wandb
 import time
 import Procedure
+import os
 from os.path import join
+
 # ==============================
+os.environ["CUDA_VISIBLE_DEVICES"] = f"0,1"
 utils.set_seed(world.seed)
 print(">>SEED:", world.seed)
 # ==============================
@@ -22,34 +27,39 @@ weight_file = utils.getFileName()
 print(f"load and save to {weight_file}")
 if world.LOAD:
     try:
-        Recmodel.load_state_dict(torch.load(weight_file,map_location=torch.device('cpu')))
+        Recmodel.load_state_dict(
+            torch.load(weight_file, map_location=torch.device("cpu"))
+        )
         world.cprint(f"loaded model weights from {weight_file}")
     except FileNotFoundError:
         print(f"{weight_file} not exists, start from beginning")
 Neg_k = 1
 
-# init tensorboard
 if world.tensorboard:
-    w : SummaryWriter = SummaryWriter(
-                                    join(world.BOARD_PATH, time.strftime("%m-%d-%Hh%Mm%Ss-") + "-" + world.comment)
-                                    )
+    w: SummaryWriter = SummaryWriter(
+        join(world.BOARD_PATH, time.strftime("%m-%d-%Hh%Mm%Ss-") + "-" + world.comment)
+    )
 else:
     w = None
     world.cprint("not enable tensorflowboard")
+    wandb.login()
+    wandb.init(
+        project="inha-Competition",
+        group=world.simple_model,
+    )
+
 
 try:
-    if(world.simple_model != 'none'):
-        epoch = 0
-        cprint("[TEST]")
-        Procedure.Test(dataset, Recmodel, epoch, w, world.config['multicore'])
-    else:
-        for epoch in range(world.TRAIN_epochs):
-            if epoch %10 == 0:
-                cprint("[TEST]")
-                Procedure.Test(dataset, Recmodel, epoch, w, world.config['multicore'])
-            output_information = Procedure.BPR_train_original(dataset, Recmodel, bpr, epoch, neg_k=Neg_k,w=w)
-            print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
-            torch.save(Recmodel.state_dict(), weight_file)
+    for epoch in range(world.TRAIN_epochs):
+        output_information = Procedure.BPR_train_original(
+            dataset, Recmodel, bpr, epoch, neg_k=Neg_k, w=w
+        )
+        print(f"EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}")
+        torch.save(Recmodel.state_dict(), weight_file)
+        if epoch % 10 == 0:
+            cprint("[TEST]")
+            Procedure.Test(dataset, Recmodel, epoch, w, world.config["multicore"])
 finally:
     if world.tensorboard:
         w.close()
+print("end")
