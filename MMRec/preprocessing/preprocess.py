@@ -7,6 +7,14 @@ from sklearn.model_selection import KFold
 from collections import Counter
 
 
+def createDirectory(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print("Error: Failed to create the directory.")
+
+
 def splitting_1(df, version):
     df = df.sample(frac=1).reset_index(drop=True)
     df.sort_values(by=["userID"], inplace=True)
@@ -162,7 +170,7 @@ if __name__ == "__main__":
     random.seed(42)
     np.random.seed(42)
     os.chdir("..")
-
+    createDirectory("MMRec/data/Inha")
     for file in ["image.npy", "text.npy"]:
         feat = os.path.join("MMRec/data/Inha", file)
         if not os.path.isfile(feat):
