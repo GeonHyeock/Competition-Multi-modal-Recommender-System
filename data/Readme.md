@@ -1,5 +1,5 @@
 # Dataset Info.
-코드 재현을 위해서는 [raw](data/raw) 폴더에 데이터를 다운받아주세요.
+코드 재현을 위해서는 [raw](/raw) 폴더에 데이터를 다운받아주세요.
 - [download-link](https://dacon.io/competitions/official/236113/data)
 
 
