@@ -147,6 +147,7 @@ dmypy.json
 # Aim logging
 .aim
 
+data/raw
 MMRec/data/
 submission.csv
 wandb
