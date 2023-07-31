@@ -46,7 +46,8 @@ Multi-modal 데이터 기반의 고성능 추천 알고리즘 개발을 통해 �
     |        3 |  128           |  64            | 0.036240 |     0.002700 |  0.093280 | 0.019020 |
     |        6 |  128           |  128           | 0.036140 |     0.002740 |  0.094720 | 0.018580 |
 
-<iframe src="https://wandb.ai/geonhyeock/inha-Competition/reports/Untitled-Report--Vmlldzo1MDE2NTc2" style="border:none;height:1024px;width:100%">
+
+<iframe width="1024" height=100% src="https://wandb.ai/geonhyeock/inha-Competition/reports/Untitled-Report--Vmlldzo1MDE2NTc2"></iframe>
 
 ## 코드 재현
 
