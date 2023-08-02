@@ -11,6 +11,6 @@ inter_file_name: 'Inha-v4.inter'
 # name of features
 vision_feature_file: 'image.npy'
 text_feature_file: 'text.npy'
-# user_graph_dict_file: 'user_graph_dict.npy'
+user_graph_dict_file: 'user_graph_dict.npy'
 
 field_separator: "\t"
