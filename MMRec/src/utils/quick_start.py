@@ -47,6 +47,9 @@ def quick_start(model, dataset, config_dict, save_model=True):
     for hyper_tuple in combinators:
         for j, k in zip(config["hyper_parameters"], hyper_tuple):
             config[j] = k
+        if "user_graph_dict_file" in config.final_config_dict.keys():
+            inter = config["inter_splitting_label"]
+            config["user_graph_dict_file"] = inter + "_user_graph_dict.npy"
         config["hyper"] = {i: config[i] for i in config["hyper_parameters"]}
         wandb.init(
             project="inha-Competition",

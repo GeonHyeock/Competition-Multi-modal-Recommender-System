@@ -74,8 +74,8 @@ if __name__ == "__main__":
         os.path.join(dataset_path, config["inter_file_name"]), sep="\t"
     )
     num_user = len(pd.unique(train_df[uid_field]))
-    for i in range(5):
-        train_df = train_df[train_df[f"fold_{i}"] == 0].copy()
+    for idx in range(5):
+        train_df = train_df[train_df[f"fold_{idx}"] == 0].copy()
         train_data = train_df[[uid_field, iid_field]].to_numpy()
         # item_item_pairs =[]
         user_graph_matrix = gen_user_matrix(train_data, num_user)
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         edge_list_i = []
         edge_list_j = []
 
-        for i in range(num_user):
+        for i in range(num_user)[:1]:
             user_num[i] = len(torch.nonzero(user_graph[i]))
             print("this is ", i, "num", user_num[i])
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                 user_graph_dict[i] = edge_list
         # pdb.set_trace()
         np.save(
-            os.path.join(dataset_path, f"fold_{i}" + config["user_graph_dict_file"]),
+            os.path.join(dataset_path, f"fold_{idx}_" + config["user_graph_dict_file"]),
             user_graph_dict,
             allow_pickle=True,
         )
