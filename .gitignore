@@ -155,3 +155,6 @@ saved
 submission
 logs
 Hydra_lightning/data
+NCL/dataset/Inha
+NCL/log
+NCL/log_tensorboard
