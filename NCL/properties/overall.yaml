@@ -7,6 +7,7 @@ eval_setting:
 
 train_batch_size: 4096
 eval_batch_size: 4096000
-valid_metric: NDCG@10
+valid_metric: NDCG@50
 metrics: ["Recall", "NDCG"]
 topk: [10, 20, 50]
+
