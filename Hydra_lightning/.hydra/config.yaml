@@ -9,7 +9,7 @@ seed: 42
 data:
   _target_: src.data.Multi_VAE_datamodule.MultiVaeModule
   data_dir: ${paths.data_dir}
-  batch_size: 128
+  batch_size: 2048
   num_workers: 32
   pin_memory: false
 model:
@@ -20,27 +20,25 @@ model:
     lr: 0.001
     weight_decay: 0.0
   scheduler:
-    _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
     _partial_: true
-    mode: min
-    factor: 0.1
-    patience: 10
+    T_max: 10
   net:
     _target_: Multi_VAE.model.MultiVAE
     p_dims:
-    - 200
-    - 600
-    - 63001
+    - 256
+    - 1024
+    - 62845
 callbacks:
   model_checkpoint:
     _target_: lightning.pytorch.callbacks.ModelCheckpoint
     dirpath: ${paths.output_dir}/checkpoints
     filename: epoch_{epoch:03d}
-    monitor: val/epoch_loss
+    monitor: val/ndcg@50
     verbose: false
     save_last: true
     save_top_k: 1
-    mode: min
+    mode: max
     auto_insert_metric_name: false
     save_weights_only: false
     every_n_train_steps: null
@@ -49,11 +47,11 @@ callbacks:
     save_on_train_epoch_end: null
   early_stopping:
     _target_: lightning.pytorch.callbacks.EarlyStopping
-    monitor: val/epoch_loss
+    monitor: val/ndcg@50
     min_delta: 0.0
-    patience: 5
+    patience: 50
     verbose: false
-    mode: min
+    mode: max
     strict: true
     check_finite: true
     stopping_threshold: null
@@ -64,13 +62,27 @@ callbacks:
     max_depth: -1
   rich_progress_bar:
     _target_: lightning.pytorch.callbacks.RichProgressBar
+logger:
+  wandb:
+    _target_: lightning.pytorch.loggers.wandb.WandbLogger
+    name: Multi_VAE
+    save_dir: ${paths.output_dir}
+    offline: false
+    id: null
+    anonymous: GH
+    project: inha-Competition
+    log_model: false
+    prefix: ''
+    group: test
+    tags: []
+    job_type: ''
 trainer:
   _target_: lightning.pytorch.trainer.Trainer
   default_root_dir: ${paths.output_dir}
   min_epochs: 1
-  max_epochs: 200
+  max_epochs: 2000
   accelerator: gpu
-  devices: 2
+  devices: 4
   check_val_every_n_epoch: 1
   deterministic: false
   strategy: ddp_find_unused_parameters_true

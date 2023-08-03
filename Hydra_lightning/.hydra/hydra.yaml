@@ -1,6 +1,6 @@
 hydra:
   run:
-    dir: /home/inhamath/competition/Hydra_lightning
+    dir: /home/inhamath/Challenge-Multi-modal-Recommender-System/Hydra_lightning
   sweep:
     dir: ${paths.log_dir}/${task_name}/multiruns/${now:%Y-%m-%d}_${now:%H-%M-%S}
     subdir: ${hydra.job.num}
@@ -118,12 +118,12 @@ hydra:
   output_subdir: .hydra
   overrides:
     hydra:
-    - hydra.run.dir="/home/inhamath/competition/Hydra_lightning"
-    - hydra.job.name=train_ddp_process_1
+    - hydra.run.dir="/home/inhamath/Challenge-Multi-modal-Recommender-System/Hydra_lightning"
+    - hydra.job.name=train_ddp_process_3
     - hydra.mode=RUN
     task: []
   job:
-    name: train_ddp_process_1
+    name: train_ddp_process_3
     chdir: null
     override_dirname: ''
     id: ???
@@ -139,12 +139,12 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /home/inhamath/competition/Hydra_lightning
+    cwd: /home/inhamath/Challenge-Multi-modal-Recommender-System/Hydra_lightning
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /home/inhamath/competition/Hydra_lightning/configs
+    - path: /home/inhamath/Challenge-Multi-modal-Recommender-System/Hydra_lightning/configs
       schema: file
       provider: main
     - path: hydra_plugins.hydra_colorlog.conf
@@ -153,7 +153,7 @@ hydra:
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /home/inhamath/competition/Hydra_lightning
+    output_dir: /home/inhamath/Challenge-Multi-modal-Recommender-System/Hydra_lightning
     choices:
       debug: null
       local: default.yaml
@@ -163,8 +163,8 @@ hydra:
       extras: default.yaml
       paths: default.yaml
       trainer: ddp.yaml
-      logger: null
-      callbacks: FM.yaml
+      logger: wandb
+      callbacks: default.yaml
       model: Multi_VAE.yaml
       data: Multi_VAE.yaml
       hydra/env: default
