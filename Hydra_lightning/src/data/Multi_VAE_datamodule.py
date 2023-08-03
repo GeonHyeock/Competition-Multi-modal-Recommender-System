@@ -31,7 +31,7 @@ class MultiVaeModule(LightningDataModule):
 
     def train_dataloader(self):
         return DataLoader(
-            dataset=MyDataset(self.train_data, self.hparams.batch_size),
+            dataset=TrainDataset(self.train_data),
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
@@ -40,7 +40,7 @@ class MultiVaeModule(LightningDataModule):
 
     def val_dataloader(self):
         return DataLoader(
-            dataset=MyDataset(self.train_data, self.hparams.batch_size),
+            dataset=ValidDataset(self.vad_data_tr, self.vad_data_te),
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
@@ -63,23 +63,41 @@ class MultiVaeModule(LightningDataModule):
         pass
 
 
-class MyDataset(Dataset):
-    def __init__(self, DATA, batch_size):
+class TrainDataset(Dataset):
+    def __init__(self, DATA):
         self.DATA = DATA
         self.N = DATA.shape[0]
-        self.batch_size = batch_size
 
     def naive_sparse2tensor(self, data):
-        return torch.FloatTensor(data.toarray())
+        return torch.FloatTensor(data.toarray()).squeeze()
 
     def __len__(self):
         return self.DATA.shape[0]
 
     def __getitem__(self, idx):
-        end_idx = min(idx + self.batch_size, self.N)
-        data = self.DATA[idx:end_idx]
+        data = self.DATA[idx]
         data = self.naive_sparse2tensor(data)
         return data
+
+
+class ValidDataset(Dataset):
+    def __init__(self, data_tr, data_te):
+        self.DATA = data_tr
+        self.heldout_data = data_te
+
+    def naive_sparse2tensor(self, data):
+        return torch.FloatTensor(data.toarray()).squeeze()
+
+    def __len__(self):
+        return self.DATA.shape[0]
+
+    def __getitem__(self, idx):
+        data = self.DATA[idx]
+        data = self.naive_sparse2tensor(data)
+
+        data2 = self.heldout_data[idx]
+        data2 = self.naive_sparse2tensor(data2)
+        return (data, data2)
 
 
 if __name__ == "__main__":

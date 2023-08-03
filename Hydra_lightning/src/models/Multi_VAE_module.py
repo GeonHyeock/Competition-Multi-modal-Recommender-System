@@ -1,7 +1,9 @@
 from typing import Any
-
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+from torchmetrics import MaxMetric, MeanMetric, MinMetric
+from Multi_VAE.metric import NDCG_binary_at_k_batch, Recall_at_k_batch
 from lightning import LightningModule
 
 
@@ -35,18 +37,20 @@ class MultiVaeModule(LightningModule):
         # loss function
         self.criterion = loss_function_vae
 
+        # metric
+        self.train_loss = MeanMetric()
+        self.ndcg_50 = MeanMetric()
+        self.recall_50 = MeanMetric()
+
     def forward(self, x: torch.Tensor):
         return self.net(x)
 
     def on_train_start(self):
-        # by default lightning executes validation step sanity checks before training starts,
-        # so it's worth to make sure validation metrics don't store results from these checks
-        self.val_loss.reset()
+        self.train_loss.reset()
+        self.ndcg_50.reset()
+        self.recall_50.reset()
 
     def model_step(self, batch: Any):
-        pass
-
-    def training_step(self, batch: Any, batch_idx: int):
         recon_batch, mu, logvar = self.forward(batch)
         if self.net.total_anneal_steps > 0:
             anneal = min(
@@ -55,6 +59,11 @@ class MultiVaeModule(LightningModule):
             )
         else:
             anneal = self.anneal_cap
+
+        return recon_batch, mu, logvar, anneal
+
+    def training_step(self, batch: Any, batch_idx: int):
+        recon_batch, mu, logvar, anneal = self.model_step(batch)
         self.net.update_count += 1
         loss = self.criterion(recon_batch, batch, mu, logvar, anneal)
         # update and log metrics
@@ -72,29 +81,29 @@ class MultiVaeModule(LightningModule):
         return loss
 
     def on_train_epoch_end(self):
-        pass
+        self.log("train/loss", self.train_loss.compute(), sync_dist=True, prog_bar=True)
 
     def validation_step(self, batch: Any, batch_idx: int):
-        loss, preds, y = self.model_step(batch)
+        batch, heldout_data = batch
+        recon_batch, mu, logvar, anneal = self.model_step(batch)
+        loss = self.criterion(recon_batch, batch, mu, logvar, anneal)
 
-        # update and log metrics
-        self.val_loss(loss)
-        self.log(
-            "val/loss",
-            self.val_loss,
-            on_step=True,
-            on_epoch=False,
-            prog_bar=True,
-            sync_dist=True,
-        )
+        n50 = NDCG_binary_at_k_batch(recon_batch, heldout_data, 50)
+        r50 = Recall_at_k_batch(recon_batch, heldout_data, 50)
+
+        self.ndcg_50(n50.mean())
+        self.recall_50(r50.mean())
 
     def on_validation_epoch_end(self):
-        mse = self.val_loss.compute()  # get current val acc
-        self.val_mse_best(mse)  # update best so far val acc
-        # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
-        # otherwise metric would be reset by lightning after each epoch
-        self.log(
-            "val/epoch_loss", self.val_mse_best.compute(), sync_dist=True, prog_bar=True
+        ndcg = self.ndcg_50.compute()
+        recall = self.recall_50.compute()
+        self.log_dict(
+            {
+                "val/ndcg@50": ndcg,
+                "val/recall@50": recall,
+            },
+            sync_dist=True,
+            prog_bar=True,
         )
 
     def test_step(self, batch: Any, batch_idx: int):

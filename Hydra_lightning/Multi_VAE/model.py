@@ -89,18 +89,15 @@ class MultiVAE(nn.Module):
 
         # Last dimension of q- network is for mean and variance
         temp_q_dims = self.q_dims[:-1] + [self.q_dims[-1] * 2]
-        self.q_layers = nn.ModuleList(
-            [
-                nn.Linear(d_in, d_out)
-                for d_in, d_out in zip(temp_q_dims[:-1], temp_q_dims[1:])
-            ]
-        )
-        self.p_layers = nn.ModuleList(
-            [
-                nn.Linear(d_in, d_out)
-                for d_in, d_out in zip(self.p_dims[:-1], self.p_dims[1:])
-            ]
-        )
+        q_layers, p_layers = [], []
+        for d_in, d_out in zip(temp_q_dims[:-1], temp_q_dims[1:]):
+            q_layers += [nn.Linear(d_in, d_out), nn.LeakyReLU(), nn.BatchNorm1d(d_out)]
+
+        for d_in, d_out in zip(self.p_dims[:-1], self.p_dims[1:]):
+            p_layers += [nn.Linear(d_in, d_out), nn.LeakyReLU(), nn.BatchNorm1d(d_out)]
+
+        self.q_layers = nn.ModuleList(q_layers[:-2])
+        self.p_layers = nn.ModuleList(p_layers[:-2])
 
         self.drop = nn.Dropout(dropout)
         self.init_weights()
@@ -142,25 +139,27 @@ class MultiVAE(nn.Module):
     def init_weights(self):
         for layer in self.q_layers:
             # Xavier Initialization for weights
-            size = layer.weight.size()
-            fan_out = size[0]
-            fan_in = size[1]
-            std = np.sqrt(2.0 / (fan_in + fan_out))
-            layer.weight.data.normal_(0.0, std)
+            if torch.nn.modules.linear.Linear == layer.__class__:
+                size = layer.weight.size()
+                fan_out = size[0]
+                fan_in = size[1]
+                std = np.sqrt(2.0 / (fan_in + fan_out))
+                layer.weight.data.normal_(0.0, std)
 
-            # Normal Initialization for Biases
-            layer.bias.data.normal_(0.0, 0.001)
+                # Normal Initialization for Biases
+                layer.bias.data.normal_(0.0, 0.001)
 
         for layer in self.p_layers:
             # Xavier Initialization for weights
-            size = layer.weight.size()
-            fan_out = size[0]
-            fan_in = size[1]
-            std = np.sqrt(2.0 / (fan_in + fan_out))
-            layer.weight.data.normal_(0.0, std)
+            if torch.nn.modules.linear.Linear == layer.__class__:
+                size = layer.weight.size()
+                fan_out = size[0]
+                fan_in = size[1]
+                std = np.sqrt(2.0 / (fan_in + fan_out))
+                layer.weight.data.normal_(0.0, std)
 
-            # Normal Initialization for Biases
-            layer.bias.data.normal_(0.0, 0.001)
+                # Normal Initialization for Biases
+                layer.bias.data.normal_(0.0, 0.001)
 
 
 def sparse2torch_sparse(data):
@@ -180,3 +179,7 @@ def sparse2torch_sparse(data):
         indices, torch.from_numpy(values).float(), [samples, features]
     )
     return t
+
+
+if __name__ == "__main__":
+    MultiVAE([100, 200, 300, 400, 500])
