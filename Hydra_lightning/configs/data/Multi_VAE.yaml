@@ -1,0 +1,5 @@
+_target_: src.data.Multi_VAE_datamodule.MultiVaeModule
+data_dir: ${paths.data_dir}
+batch_size: 2048
+num_workers: 32
+pin_memory: False
