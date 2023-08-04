@@ -7,13 +7,14 @@
 Multi-modal 데이터 기반의 고성능 추천 알고리즘 개발을 통해 추천 시스템의 한계를 극복하고 사용자에게 최적화된 개인화 추천 경험을 제공하는 것을 기대합니다.
 
 ## Index
-* [대회 정보](#대회-정보)
-* [모델](#모델)
-* [코드 재현](#코드-재현)
+* [Competition imformation](#Competition-imformation)
+* [Data](#Data)
+* [Model](#Model)
+* [Code reproduction](#Code-reproduction)
 ***
 
 
-## 대회 정보
+## Competition imformation
 
 - 주관: 인공지능융한연구센터, BK 산업융합형 차세대 인공지능 혁신인재 교육연구단
 - 운영: 데이콘
@@ -29,7 +30,20 @@ Multi-modal 데이터 기반의 고성능 추천 알고리즘 개발을 통해 �
 
     $relevance_i$값은 평점이 3이상이면 1, 아니면 0으로 이진화 하여 계산
 
-## 모델
+## Data
+
+|name|count|
+|:---:|:---:|
+|user_id|192403|
+|item_id|62989|
+|interection|1254441|
+
+item_id에 해당하는 image_feat, text_feat 제공
+
+For more : [Raw data](data)
+
+
+## Model
 - BM3 : [paper](https://arxiv.org/pdf/2207.05969.pdf) / [review]()
 
 - Hyperparameter table
@@ -37,7 +51,7 @@ Multi-modal 데이터 기반의 고성능 추천 알고리즘 개발을 통해 �
     - Device : GeForce RTX 3080 Ti 12GB
     - ndcg@50 내림차순 정렬
 
-    | n_layers | embedding_size | feat_embed_dim | ndcg@50  | precision@50 | recall@50 | map@50   | training_time_avg | inference_time |
+    | n_layers | embedding_size | feat_embed_dim | ndcg@50  | precision@50 | recall@50 | map@50   | training_time_avg | inference_time_avg |
     | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
     |        4 |            256 |            128 | 0.036900 |     0.002700 |  0.093460 | 0.019720 | 4h 18m 0.60s      | 25.08s         |
     |        3 |            256 |            128 | 0.036800 |     0.002680 |  0.092940 | 0.019720 | 3h 55m 50.60s     | 20.56s         |
@@ -54,9 +68,9 @@ Multi-modal 데이터 기반의 고성능 추천 알고리즘 개발을 통해 �
 
 [Table Visualization](https://api.wandb.ai/links/geonhyeock/8vz3j6ru)
 
-## 코드 재현
+## Code reproduction
 
-- [Raw data](data)
+- [데이터 저장](data)
 
 ~~~ sh
 # 모델 훈련 환경 구축
@@ -71,9 +85,9 @@ python preprocessing/preprocess.py
 python src/main.py -m BM3 -d Inha
 
 # Model Inference
-python src/submission.py    
+python src/submission.py
 
 # submission 생성
 cd ..
-python src/ensemble.py -t weighted_voting
+python src/ensemble.py -t weighted_voting -folder my_best
 ~~~
