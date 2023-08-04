@@ -70,7 +70,8 @@ For more : [Raw data](data)
 
 ## Code reproduction
 
-- [데이터 저장](data)
+- [데이터](data)
+- config : [model](MMRec/src/configs/model), [dataset](MMRec/src/configs/dataset), [overall](MMRec/src/configs/)
 
 ~~~ sh
 # 모델 훈련 환경 구축
@@ -82,12 +83,17 @@ sh docker.sh
 python preprocessing/preprocess.py
 
 # Model Train
-python src/main.py -m BM3 -d Inha
+python src/main.py -m BM3
 
 # Model Inference
 python src/submission.py
 
 # submission 생성
 cd ..
-python src/ensemble.py -t weighted_voting -folder my_best
+python src/ensemble.py -t weighted_voting -f BM3
+~~~
+
+~~~
+앙상블 결과 경로 : /workspace/root/Challenge-Multi-modal-Recommender-System/submission/best.csv
+docker cp [container ID]:[앙상블 결과 경로] [host 파일경로]
 ~~~
