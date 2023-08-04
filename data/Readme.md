@@ -1,7 +1,7 @@
 # Dataset Info.
 코드 재현을 위해서는 [raw](./raw/) 폴더에 데이터를 다운받아주세요.
+- 필요한 데이터 : train.csv, image.npy, text.npy
 - [download-link](https://dacon.io/competitions/official/236113/data)
-
 
 
 ### train.csv [파일]
