@@ -168,7 +168,7 @@ def BM3(version=4):
 
 if __name__ == "__main__":
     random.seed(42)
-    np.random.seed(42)
+    random.seed(42)
     os.chdir("..")
     createDirectory("MMRec/data/Inha")
     for file in ["image.npy", "text.npy"]:
