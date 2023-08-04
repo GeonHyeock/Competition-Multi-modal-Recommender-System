@@ -75,6 +75,7 @@ For more : [Raw data](data)
 
 ~~~ sh
 # 모델 훈련 환경 구축
+# docker는 CUDA Version: 11.2 기준으로 작성되었습니다. Dockerfile을 확인해주세요
 sh docker.sh
 ~~~
 
