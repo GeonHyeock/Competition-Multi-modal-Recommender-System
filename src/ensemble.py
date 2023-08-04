@@ -57,7 +57,7 @@ def weighted_voting(output_file_list, name="weighted_voting", item_num=63001):
         item_id.extend(np.argsort(item)[::-1][:50])
 
     result = pd.DataFrame({"user_id": user_id, "item_id": item_id})
-    result.to_csv(f"../submission/{name}3.csv", index=False)
+    result.to_csv(f"../submission/{name}.csv", index=False)
 
 
 if __name__ == "__main__":
@@ -70,19 +70,25 @@ if __name__ == "__main__":
         choices=["weighted_voting", "hard_voting"],
         help="name of ensemble",
     )
+    parser.add_argument(
+        "--folder",
+        "-f",
+        type=str,
+        default="my_best",
+        help="ensemble folder name",
+    )
+    parser.add_argument(
+        "--name",
+        "-n",
+        type=str,
+        default="best",
+        help="ensemble result csv name",
+    )
     args, _ = parser.parse_known_args()
 
     os.chdir("submission")
     np.random.seed(42)
-    output_file_list = []
-    hyper = zip([4], [256], [128])
-    for n_layer, emb, feat in hyper:
-        for i in range(5):
-            output_file_list.append(
-                "./BM3/hyper={"
-                + f"'n_layers': {n_layer}, 'dropout': 0.5, 'embedding_size': {emb}, 'feat_embed_dim': {feat}, 'inter_splitting_label': 'fold_{i}'"
-                + "}.pt.csv"
-            )
+    output_file_list = [f"{args.folder}/" + f for f in os.listdir(f"{args.folder}")]
 
     ensemble = eval(args.type)
-    ensemble(output_file_list)
+    ensemble(output_file_list, f"{args.name}")
