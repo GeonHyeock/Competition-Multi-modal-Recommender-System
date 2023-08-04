@@ -6,7 +6,7 @@ ITEM_ID_FIELD: itemID
 
 filter_out_cod_start_users: True
 
-inter_file_name: 'Inha-v4-light.inter'
+inter_file_name: 'Inha-v4.inter'
 
 # name of features
 vision_feature_file: 'image.npy'
