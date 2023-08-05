@@ -7,10 +7,11 @@
 Multi-modal 데이터 기반의 고성능 추천 알고리즘 개발을 통해 추천 시스템의 한계를 극복하고 사용자에게 최적화된 개인화 추천 경험을 제공하는 것을 기대합니다.
 
 ## Index
-* [Competition imformation](#Competition-imformation)
-* [Data](#Data)
-* [Model](#Model)
-* [Code reproduction](#Code-reproduction)
+* [Competition imformation](#competition-imformation)
+* [Data](#data)
+* [Model](#model)
+* [Result](#result)
+* [Code reproduction](#code-reproduction)
 ***
 
 
@@ -44,7 +45,7 @@ For more : [Raw data](data)
 
 
 ## Model
-- BM3 : [paper](https://arxiv.org/pdf/2207.05969.pdf) / [review]()
+- BM3 : [paper](https://arxiv.org/pdf/2207.05969.pdf)
 
 - Hyperparameter table
     - metric & inference_time : 5-fold average
@@ -67,6 +68,18 @@ For more : [Raw data](data)
 
 
 [Table Visualization](https://api.wandb.ai/links/geonhyeock/8vz3j6ru)
+
+## Result
+
+best5 model ensemble
+
+|Type|Public|Private|
+| :---: | :---: | :---: |
+|Hard_voting| 0.0428 | ? |
+|weighted_voting| 0.0386 | ? |
+
+- Hard_voting : 각 모델이 유저별 예측한 아이템의 빈도수를 기준으로 큰 값부터 추천
+- weighted_voting : Hard_voting에서 $i$ 번째 등장한 아이템에 대하여 $\frac{1}{log_2(i+1)}$ 가중치를 더하여 큰 값부터 추천
 
 ## Code reproduction
 
@@ -98,3 +111,4 @@ python src/ensemble.py -t weighted_voting -f BM3
 앙상블 결과 경로 : /workspace/root/Challenge-Multi-modal-Recommender-System/submission/best.csv
 docker cp [container ID]:[앙상블 결과 경로] [host 파일경로]
 ~~~
+
