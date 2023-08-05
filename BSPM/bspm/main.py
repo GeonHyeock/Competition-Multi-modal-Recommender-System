@@ -12,7 +12,7 @@ import os
 from os.path import join
 
 # ==============================
-os.environ["CUDA_VISIBLE_DEVICES"] = f"0,1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 utils.set_seed(world.seed)
 print(">>SEED:", world.seed)
 # ==============================

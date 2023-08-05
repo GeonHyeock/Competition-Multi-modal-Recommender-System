@@ -13,7 +13,7 @@ def parse_args():
         "--recdim", type=int, default=64, help="the embedding size of lightGCN"
     )
     parser.add_argument(
-        "--layer", type=int, default=3, help="the layer num of lightGCN"
+        "--layer", type=int, default=4, help="the layer num of lightGCN"
     )
     parser.add_argument("--lr", type=float, default=0.001, help="the learning rate")
     parser.add_argument(
