@@ -71,15 +71,16 @@ For more : [Raw data](data)
 
 ## Result
 
-best5 model ensemble
+- best5 parameter model ensemble : 25개의 csv 파일 (model : 5 and fold : 5)
+- Hard_voting : 각 모델이 유저별 예측한 아이템의 빈도수를 기준으로 큰 값부터 추천
+- weighted_voting : Hard_voting에서 $i$ 번째 등장한 아이템에 대하여 $\frac{1}{log_2(i+1)}$ 가중치를 더하여 큰 값부터 추천
+
 
 |Type|Public|Private|
 | :---: | :---: | :---: |
-|Hard_voting| 0.0428 | ? |
-|weighted_voting| 0.0386 | ? |
+| weighted_voting | 0.0428 | ? |
+| Hard_voting     | 0.0386 | ? |
 
-- Hard_voting : 각 모델이 유저별 예측한 아이템의 빈도수를 기준으로 큰 값부터 추천
-- weighted_voting : Hard_voting에서 $i$ 번째 등장한 아이템에 대하여 $\frac{1}{log_2(i+1)}$ 가중치를 더하여 큰 값부터 추천
 
 ## Code reproduction
 
