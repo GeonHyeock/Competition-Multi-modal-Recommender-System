@@ -7,6 +7,14 @@ from sklearn.model_selection import KFold
 from collections import Counter
 
 
+def createDirectory(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print("Error: Failed to create the directory.")
+
+
 def splitting_1(df, version):
     df = df.sample(frac=1).reset_index(drop=True)
     df.sort_values(by=["userID"], inplace=True)
@@ -81,7 +89,14 @@ def rating2inter_0(df, splitting=[0.8, 0.2]):
 
     u_df.to_csv(os.path.join(rslt_dir, u_mapping_file), sep="\t", index=False)
     i_df.to_csv(os.path.join(rslt_dir, i_mapping_file), sep="\t", index=False)
+
+    image = np.load("data/raw/image.npy")
+    text = np.load("data/raw/text.npy")
     print(f"mapping dumped...")
+
+    np.save(os.path.join(rslt_dir, "image.npy"), image[i_df.asin.values])
+    np.save(os.path.join(rslt_dir, "text.npy"), text[i_df.asin.values])
+    print(f"mapping dumped item_feat")
 
     print(f"splitting ...")
     tot_ratio = sum(splitting)
@@ -162,14 +177,7 @@ if __name__ == "__main__":
     random.seed(42)
     np.random.seed(42)
     os.chdir("..")
-
-    for file in ["image.npy", "text.npy"]:
-        feat = os.path.join("MMRec/data/Inha", file)
-        if not os.path.isfile(feat):
-            try:
-                shutil.copyfile(os.path.join("data/raw", file), feat)
-            except:
-                pass
+    createDirectory("MMRec/data/Inha")
 
     df = pd.read_csv(
         "./data/raw/train.csv",

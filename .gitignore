@@ -144,17 +144,17 @@ dmypy.json
 *.tar
 *.tar.gz
 
-# Lightning-Hydra-Template
-configs/local/default.yaml
-/data/
-/logs/
-.env
-
 # Aim logging
 .aim
 
+data/raw
 MMRec/data/
 submission.csv
 wandb
 saved
 submission
+logs
+Hydra_lightning/data
+NCL/dataset/Inha
+NCL/log
+NCL/log_tensorboard

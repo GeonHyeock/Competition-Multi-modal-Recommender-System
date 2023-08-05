@@ -18,7 +18,9 @@ os.environ["NUMEXPR_MAX_THREADS"] = "48"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", "-m", type=str, default="BM3", help="name of models")
+    parser.add_argument(
+        "--model", "-m", type=str, default="DRAGON", help="name of models"
+    )
     parser.add_argument(
         "--dataset", "-d", type=str, default="Inha", help="name of datasets"
     )

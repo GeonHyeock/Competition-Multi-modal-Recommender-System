@@ -3,6 +3,8 @@ import yaml
 import argparse
 import os
 import pandas as pd
+import time
+import re
 from tqdm import tqdm
 from utils.dataset import RecDataset
 from utils.configurator import Config
@@ -45,7 +47,8 @@ def submission(args):
     model.eval()
     submission_user, submission_item = [], []
     with tqdm(total=len(eval_data)) as pbar:
-        for batch_idx, batched_data in tqdm(enumerate(eval_data)):
+        start = time.time()
+        for _, batched_data in tqdm(enumerate(eval_data)):
             # predict: interaction without item ids
             scores = model.full_sort_predict(batched_data)
             masked_items = batched_data[1]
@@ -57,9 +60,9 @@ def submission(args):
                 submission_user.extend(user.repeat(50).cpu().numpy())
             submission_item.extend(topk_index.view(-1).cpu().numpy())
             pbar.update(1)
+    end = time.time()
 
     submission = pd.DataFrame({"user_id": submission_user, "item_id": submission_item})
-
     i_id_mapping = pd.read_csv("./data/Inha/i_id_mapping.csv", sep="\t").to_dict()
     u_id_mapping = pd.read_csv("./data/Inha/u_id_mapping.csv", sep="\t").to_dict()
 
@@ -67,6 +70,8 @@ def submission(args):
     submission.item_id = submission.item_id.map(i_id_mapping["asin"])
 
     submission.to_csv(f"../submission/{args.model}/{args.Saved_Model}.csv", index=False)
+
+    return end - start
 
 
 if __name__ == "__main__":
@@ -82,8 +87,24 @@ if __name__ == "__main__":
 
     createDirectory(os.path.join(f"../submission/{args.model}"))
 
+    p = re.compile(r"[0-9]\.?[0-9]*")
+    n_layer, embedding_size, feat_embed_dim, inference_time = [], [], [], []
     for pt in os.listdir(args.Saved_Model):
         if "inter" in pt:
             args.Saved_Model = pt
-            submission(args)
+            layer, _, emb, feat, _ = p.findall(pt)
+            inf_time = submission(args)
+
+            n_layer.append(layer)
+            embedding_size.append(emb)
+            feat_embed_dim.append(feat)
+            inference_time.append(inf_time)
+    pd.DataFrame(
+        {
+            "n_layer": n_layer,
+            "embedding_size": embedding_size,
+            "feat_embed_dim": feat_embed_dim,
+            "inference_time": inference_time,
+        }
+    ).to_csv("../logs/infer_time.csv", index=False)
     print("Done")
