@@ -66,8 +66,9 @@ For more : [Raw data](data)
     |        5 |            128 |            128 | 0.036140 |     0.002740 |  0.094780 | 0.018640 | 5h 33m 18.80s     | 16.31s         |
     |        6 |            128 |            128 | 0.036140 |     0.002740 |  0.094720 | 0.018580 | 4h 56m 59.20s     | 18.29s         |
 
+- Drop_out : 0.5로 고정
 
-[Table Visualization](https://api.wandb.ai/links/geonhyeock/8vz3j6ru)
+    [Table Visualization](https://api.wandb.ai/links/geonhyeock/8vz3j6ru)
 
 ## Result
 
