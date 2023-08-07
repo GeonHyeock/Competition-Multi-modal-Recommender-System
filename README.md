@@ -76,10 +76,10 @@ For more : [Raw data](data)
 - weighted_voting : Hard_voting에서 $i$ 번째 등장한 아이템에 대하여 $\frac{1}{log_2(i+1)}$ 가중치를 더하여 큰 값부터 추천
 
 
-|Type|Public|Private|
+|Type|Public(30%)|Private|
 | :---: | :---: | :---: |
-| weighted_voting | 0.0428 | ? |
-| Hard_voting     | 0.0386 | ? |
+| weighted_voting | 0.0428 | 0.0442 |
+| Hard_voting     | 0.0386 | 0.0399 |
 
 
 ## Code reproduction
