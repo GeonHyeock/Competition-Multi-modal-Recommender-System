@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import time
 import re
+import numpy as np
 from tqdm import tqdm
 from utils.dataset import RecDataset
 from utils.configurator import Config
@@ -71,6 +72,99 @@ def submission(args):
 
     submission.to_csv(f"../submission/{args.model}/{args.Saved_Model}.csv", index=False)
 
+    return end - start
+
+
+def submission2(args):
+    print("submission2")
+    model = torch.load(os.path.join("saved", args.model, args.Saved_Model)).to("cuda")
+    with open("./src/configs/overall.yaml") as f:
+        config_dict = yaml.load(f, Loader=yaml.FullLoader)
+
+    with open(f"./src/configs/model/{args.model}.yaml") as f:
+        config_dict.update(yaml.load(f, Loader=yaml.FullLoader))
+
+    with open(f"./src/configs/dataset/{args.dataset}.yaml") as f:
+        config_dict.update(yaml.load(f, Loader=yaml.FullLoader))
+
+    config = Config(args.model, args.dataset, config_dict)
+    if args.Saved_Model.find("fold") >= 0:
+        idx = args.Saved_Model.find("fold")
+        config["inter_splitting_label"] = args.Saved_Model[idx : idx + 6]
+    dataset = RecDataset(config)
+    train, _, _ = dataset.split()
+    print(dataset)
+    print(train)
+    eval_data = EvalDataLoader(
+        config,
+        dataset,
+        additional_dataset=train,
+        batch_size=1028,
+    )
+    model.eval()
+
+    # step1
+    submission_user, submission_item = [], []
+    with tqdm(total=len(eval_data)) as pbar:
+        start = time.time()
+        for _, batched_data in tqdm(enumerate(eval_data)):
+            # predict: interaction without item ids
+            scores = model.full_sort_predict(batched_data)
+            masked_items = batched_data[1]
+            # mask out pos items
+            scores[masked_items[0], masked_items[1]] = -1e10
+            # rank and get top-k
+            _, topk_index = torch.topk(scores, 50, dim=-1)  # nusers x topk
+            for user in batched_data[0]:
+                submission_user.extend(user.repeat(50).cpu().numpy())
+            submission_item.extend(topk_index.view(-1).cpu().numpy())
+            pbar.update(1)
+
+    submission = pd.DataFrame({"user_id": submission_user, "item_id": submission_item})
+
+    # step2
+
+    u_count = pd.read_csv("./data/Inha/Inha-v4.inter", sep="\t").userID.value_counts()
+    N = 50
+    remove_item = submission.item_id.value_counts()[:N].index.to_numpy()
+    submission_user, submission_item = [], []
+    with tqdm(total=len(eval_data)) as pbar:
+        start = time.time()
+        for _, batched_data in tqdm(enumerate(eval_data)):
+            # predict: interaction without item ids
+            scores = model.full_sort_predict(batched_data)
+            masked_items = batched_data[1]
+            # mask out pos items
+            scores[masked_items[0], masked_items[1]] = -1e10
+            # rank and get top-k
+            _, topk_index = torch.topk(scores, 50, dim=-1)  # nusers x topk
+            for user, item in zip(batched_data[0], topk_index):
+                submission_user.extend(user.repeat(50).cpu().numpy())
+                item = item.cpu().numpy()
+
+                if u_count[int(user.cpu())] > 5:
+                    submission_item.extend(item)
+                else:
+                    priority = np.isin(item, remove_item)
+                    submission_item.extend(
+                        np.concatenate([item[priority], item[~priority]])
+                    )
+
+            pbar.update(1)
+
+    submission = pd.DataFrame({"user_id": submission_user, "item_id": submission_item})
+
+    i_id_mapping = pd.read_csv("./data/Inha/i_id_mapping.csv", sep="\t").to_dict()
+    u_id_mapping = pd.read_csv("./data/Inha/u_id_mapping.csv", sep="\t").to_dict()
+
+    submission.user_id = submission.user_id.map(u_id_mapping["user_id"])
+    submission.item_id = submission.item_id.map(i_id_mapping["asin"])
+
+    submission.to_csv(
+        f"../submission/{args.model}/{args.Saved_Model}_2.csv", index=False
+    )
+
+    end = time.time()
     return end - start
 
 

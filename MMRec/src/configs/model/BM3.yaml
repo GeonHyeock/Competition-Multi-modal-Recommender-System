@@ -1,7 +1,7 @@
-embedding_size: [64,128]
-feat_embed_dim: [64,128]
+embedding_size: [64,128,256]
+feat_embed_dim: [64,128,256]
 
-n_layers: [1,2,3,4]
+n_layers: [1,2,3,4,5,6]
 dropout: [0.3,0.5]
 reg_weight: 0.01
 cl_weight: 2.0
